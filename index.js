@@ -1,16 +1,13 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cookieSession = require('cookie-session');
 const passport = require('passport');
 const bodyParser = require('body-parser');
 const keys = require('./config/keys');
 
+require('./services/mongoose')(keys)
 require('./models/User');
 require('./models/Blog');
 require('./services/passport');
-
-mongoose.Promise = global.Promise;
-mongoose.connect(keys.mongoURI, { useMongoClient: true });
 
 const app = express();
 
