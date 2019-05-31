@@ -7,7 +7,7 @@ beforeEach(async () => {
   await page.goto('http://localhost:3000')
 })
 
-afterEach(async () => {
+afterEach(async () => { 
   await page.close()
 })
 
