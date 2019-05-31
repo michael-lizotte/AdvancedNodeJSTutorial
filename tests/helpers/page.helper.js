@@ -9,7 +9,7 @@ class Page {
     })
 
     const page = await browser.newPage()
-    const newPage = new Page(page)
+    const newPage = new Page(page, browser)
 
     return new Proxy(newPage, {
       get: function(target, property) {
@@ -19,7 +19,7 @@ class Page {
   }
 
   async login() {
-    const { session, sig } = sessionBuilder(await userBuilder())
+    const { session, sig } = sessionBuilder(await userBuilder.createUser())
     await this.page.setCookie({
       name: 'session',
       value: session
@@ -28,11 +28,25 @@ class Page {
       name: 'session.sig',
       value: sig
     })
-    await this.page.goto('localhost:3000')
+    await this.page.goto('localhost:3000/blogs')
   }
 
-  constructor(page) {
+  async logout() {
+    await userBuilder.deleteUser()
+  }
+
+  async getContent(selector) {
+    return this.page.$eval(selector, el => el.innerHTML)
+  }
+
+  async close() {
+    await this.logout()
+    this.browser.close()
+  }
+
+  constructor(page, browser) {
     this.page = page
+    this.browser = browser
   }
 }
 
