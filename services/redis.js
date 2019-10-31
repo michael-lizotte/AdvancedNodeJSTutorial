@@ -1,23 +1,23 @@
 const redis = require('redis')
 const util = require('util')
 
-function Redis() {
+function Redis () {
   this.client = {}
 }
 
-Redis.prototype.connect = function({ redisURI, redisPassword }) {
+Redis.prototype.connect = function ({ redisURI, redisPassword }) {
   this.client = redis.createClient({
-    url : redisURI,
-    password : redisPassword
+    url: redisURI,
+    password: redisPassword
   })
   const _set = this.client.set
   const _hset = this.client.hset
 
-  this.client.set = function(key, value, callback) {
+  this.client.set = function (key, value, callback) {
     return _set.apply(this, [key, value, 'EX', 60, callback])
   }
 
-  this.client.hset = function(hashKey, key, value, callback) {
+  this.client.hset = function (hashKey, key, value, callback) {
     return _hset.apply(this, [hashKey, key, value, 'EX', 60, callback])
   }
 
@@ -28,8 +28,8 @@ Redis.prototype.connect = function({ redisURI, redisPassword }) {
   this.client.del = util.promisify(this.client.del)
 }
 
-Redis.prototype.clearHash = function(hashKey) {
+Redis.prototype.clearHash = function (hashKey) {
   return this.client.del(JSON.stringify(hashKey))
 }
 
-module.exports = new Redis
+module.exports = new Redis()

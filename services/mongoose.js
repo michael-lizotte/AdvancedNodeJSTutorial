@@ -1,23 +1,25 @@
 const mongoose = require('mongoose')
 const redis = require('./redis')
 
-module.exports = function({ mongoURI, redisURI, redisPassword }) {
-  mongoose.Promise = global.Promise;
-  mongoose.connect(mongoURI, { useMongoClient: true });
+module.exports = function ({ mongoURI, redisURI, redisPassword }) {
+  mongoose.Promise = global.Promise
+  mongoose.connect(mongoURI, {
+    useNewUrlParser: true
+  })
 
   redis.connect({ redisURI, redisPassword })
 
   const client = redis.client
-  const exec = mongoose.Query.prototype.exec;
+  const exec = mongoose.Query.prototype.exec
 
-  mongoose.Query.prototype.cache = function(options = {}) {
+  mongoose.Query.prototype.cache = function (options = {}) {
     this._cache = true
     this.hashKey = JSON.stringify(options.key || '')
 
     return this
   }
 
-  mongoose.Query.prototype.exec = async function() {
+  mongoose.Query.prototype.exec = async function () {
     if (!this._cache) {
       return exec.apply(this, arguments)
     }
@@ -30,9 +32,9 @@ module.exports = function({ mongoURI, redisURI, redisPassword }) {
     if (cache) {
       const doc = JSON.parse(cache)
 
-      return Array.isArray(doc) ? 
-        doc.map(d => new this.model(d)) :
-        new this.model(doc)
+      return Array.isArray(doc)
+        ? doc.map(d => new this.model(d))
+        : new this.model(doc)
     }
 
     const result = await exec.apply(this, arguments)
